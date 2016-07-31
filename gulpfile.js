@@ -30,7 +30,7 @@ function logError(error) {
   this.emit('end');
 }
 
-gulp.task('scripts', function() {
+gulp.task('build', function() {
   var bundler = watchify(browserify('./src/app.js', {
     debug: true,
     paths: ['../node_modules', './src'],
@@ -57,8 +57,8 @@ gulp.task('scripts', function() {
   return rebundle();
 });
 
-gulp.task('watch', ['scripts'], function() {
-  gulp.watch('src/index.html').on('change', browserSync.reload);
+gulp.task('watch', ['build'], function() {
+  gulp.watch('test/index.html').on('change', browserSync.reload);
 });
 
 gulp.task('json-server', function() {
@@ -77,7 +77,10 @@ gulp.task('serve', ['watch', 'json-server'], function() {
   browserSync.init({
     middleware: [jsonServerProxy],
     online: false,
-    server: ['src', '.tmp'],
+    server: {
+      baseDir: ['test', '.tmp'],
+      index: 'index.html'
+    }
   });
 });
 
@@ -90,7 +93,7 @@ gulp.task('test', function(done) {
   }, done).start();
 });
 
-gulp.task('test:tdd', function(done) {
+gulp.task('test:watch', function(done) {
   new Karma({
     configFile: path.join(__dirname, 'karma.conf.js'),
     singleRun: false,
